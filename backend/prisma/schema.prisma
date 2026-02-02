@@ -1,0 +1,379 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User Management
+// ============================================
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  password      String
+  firstName     String
+  lastName      String
+  avatarUrl     String?
+  phone         String?
+  role          UserRole @default(DEVELOPER)
+  status        UserStatus @default(ACTIVE)
+  lastLogin     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  ownedProjects      Project[]         @relation("ProjectOwner")
+  createdProjects    Project[]         @relation("ProjectCreatedBy")
+  projectMembers     ProjectMember[]
+  assignedTasks      Task[]            @relation("TaskAssignedTo")
+  createdTasks       Task[]            @relation("TaskCreatedBy")
+  taskAssignees      TaskAssignee[]
+  taskComments       TaskComment[]
+  taskAttachments    TaskAttachment[]
+  taskHistory        TaskHistory[]
+  assignedServices   Service[]         @relation("ServiceAssignedTo")
+  createdServices    Service[]         @relation("ServiceCreatedBy")
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  integrations       Integration[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  LEAD
+  DEVELOPER
+  CLIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// ============================================
+// Project Management
+// ============================================
+model Project {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  priority    Priority  @default(MEDIUM)
+  startDate   DateTime
+  endDate     DateTime
+  budget      Decimal?  @db.Decimal(15, 2)
+  ownerId     String    @db.Uuid
+  createdById String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  owner       User      @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  createdBy   User      @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  members     ProjectMember[]
+  tasks       Task[]
+  services    Service[]
+
+  @@index([status])
+  @@index([ownerId])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+model ProjectMember {
+  id             String   @id @default(uuid()) @db.Uuid
+  projectId      String   @db.Uuid
+  userId         String   @db.Uuid
+  role           ProjectMemberRole @default(MEMBER)
+  hoursAllocated Int      @default(40)
+  joinedAt       DateTime @default(now())
+
+  // Relations
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+enum ProjectMemberRole {
+  MEMBER
+  LEAD
+  MANAGER
+}
+
+// ============================================
+// Task Management
+// ============================================
+model Task {
+  id            String   @id @default(uuid()) @db.Uuid
+  projectId     String   @db.Uuid
+  title         String
+  description   String?
+  status        TaskStatus @default(PENDING)
+  priority      Priority   @default(MEDIUM)
+  startDate     DateTime?
+  endDate       DateTime
+  estimatedHours Decimal? @db.Decimal(8, 2)
+  actualHours   Decimal  @default(0) @db.Decimal(8, 2)
+  assignedToId  String?  @db.Uuid
+  createdById   String   @db.Uuid
+  blockedReason String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo    User?    @relation("TaskAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy     User     @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  assignees     TaskAssignee[]
+  comments      TaskComment[]
+  attachments   TaskAttachment[]
+  history       TaskHistory[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([assignedToId])
+  @@index([priority])
+  @@index([endDate])
+  @@index([projectId, status])
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  BLOCKED
+  CANCELLED
+}
+
+model TaskAssignee {
+  id             String   @id @default(uuid()) @db.Uuid
+  taskId         String   @db.Uuid
+  userId         String   @db.Uuid
+  allocatedHours Decimal? @db.Decimal(8, 2)
+  assignedAt     DateTime @default(now())
+
+  // Relations
+  task           Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
+}
+
+model TaskComment {
+  id         String   @id @default(uuid()) @db.Uuid
+  taskId     String   @db.Uuid
+  userId     String?  @db.Uuid
+  comment    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+model TaskAttachment {
+  id         String   @id @default(uuid()) @db.Uuid
+  taskId     String   @db.Uuid
+  fileUrl    String
+  fileName   String
+  fileSize   Int
+  fileType   String?
+  uploadedById String @db.Uuid
+  createdAt  DateTime @default(now())
+
+  // Relations
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([taskId])
+}
+
+model TaskHistory {
+  id         String   @id @default(uuid()) @db.Uuid
+  taskId     String   @db.Uuid
+  fieldChanged String
+  oldValue   String?
+  newValue   String?
+  changedById String  @db.Uuid
+  changedAt  DateTime @default(now())
+
+  // Relations
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  changedBy  User     @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([taskId])
+  @@index([changedAt])
+}
+
+// ============================================
+// Service Management
+// ============================================
+model Service {
+  id          String   @id @default(uuid()) @db.Uuid
+  projectId   String   @db.Uuid
+  name        String
+  description String?
+  type        ServiceType @default(DEVELOPMENT)
+  status      ServiceStatus @default(PENDING)
+  startDate   DateTime?
+  endDate     DateTime?
+  cost        Decimal? @db.Decimal(15, 2)
+  assignedToId String?  @db.Uuid
+  createdById String   @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo  User?    @relation("ServiceAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy   User     @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([type])
+}
+
+enum ServiceType {
+  DEVELOPMENT
+  DESIGN
+  TESTING
+  DEPLOYMENT
+  SUPPORT
+  CONSULTATION
+}
+
+enum ServiceStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ============================================
+// Notifications
+// ============================================
+model Notification {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  type              NotificationType
+  message           String
+  relatedEntityType String?
+  relatedEntityId   String? @db.Uuid
+  isRead            Boolean @default(false)
+  readAt            DateTime?
+  createdAt         DateTime @default(now())
+
+  // Relations
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([userId, isRead, createdAt])
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  COMMENT_ADDED
+  PROJECT_STARTED
+  DEADLINE_ALERT
+  STATUS_CHANGED
+  MENTION
+}
+
+// ============================================
+// Audit Logs
+// ============================================
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String?  @db.Uuid
+  action       String
+  entityType   String
+  entityId     String   @db.Uuid
+  oldValues    Json?
+  newValues    Json?
+  ipAddress    String?
+  userAgent    String?
+  status       AuditStatus @default(SUCCESS)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@index([entityType, entityId, createdAt])
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILED
+}
+
+// ============================================
+// Integrations
+// ============================================
+model Integration {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @db.Uuid
+  type               IntegrationType
+  tokenEncrypted     String?
+  refreshTokenEncrypted String?
+  connected          Boolean  @default(true)
+  lastSync           DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum IntegrationType {
+  GOOGLE_CALENDAR
+  OUTLOOK
+  SLACK
+  GITHUB
+  JIRA
+}

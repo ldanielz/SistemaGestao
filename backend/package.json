@@ -5,17 +5,20 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec node --loader ts-node/esm src/server.ts",
+    "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "migrate": "node --loader ts-node/esm src/database/migrate.ts",
-    "seed": "node --loader ts-node/esm src/database/seed.ts",
+    "migrate": "prisma migrate dev",
+    "migrate:prod": "prisma migrate deploy",
+    "seed": "tsx src/database/seed.ts",
+    "studio": "prisma studio",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts",
-    "worker": "node --loader ts-node/esm src/workers/index.ts"
+    "worker": "tsx src/workers/index.ts",
+    "generate": "prisma generate"
   },
   "keywords": [
     "project-management",
@@ -34,7 +37,7 @@
     "helmet": "^7.0.0",
     "express-rate-limit": "^6.7.0",
     "jsonwebtoken": "^9.0.0",
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.1.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-google-oauth20": "^2.0.0",
@@ -60,6 +63,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/express": "^4.17.17",
+    "@types/bcrypt": "^5.0.0",
     "@types/jest": "^29.5.0",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
@@ -69,7 +73,8 @@
     "ts-jest": "^29.1.0",
     "supertest": "^6.3.3",
     "@types/supertest": "^2.0.12",
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "tsx": "^3.14.0"
   },
   "engines": {
     "node": ">=18.0.0"
