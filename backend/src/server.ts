@@ -6,6 +6,9 @@ import { redis } from './config/redis';
 import { errorHandler, asyncHandler } from './middleware/error.middleware';
 import { requestLogger, corsMiddleware } from './middleware/common.middleware';
 import authRoutes from './routes/auth.routes';
+import projectRoutes from './routes/project.routes';
+import taskRoutes from './routes/tasks.routes';
+import userRoutes from './routes/users.routes';
 
 dotenv.config();
 
@@ -43,6 +46,9 @@ app.get(
 
 // Rotas
 app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/users', userRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

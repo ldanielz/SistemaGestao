@@ -23,6 +23,15 @@ export interface CreateUserDTO {
   lastName: string;
   role: UserRole;
 }
+export interface UpdateUserDTO {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  avatarUrl?: string;
+  password?: string;
+  role?: UserRole;
+  status?: UserStatus;
+}
 
 export interface LoginDTO {
   email: string;
@@ -64,6 +73,17 @@ export interface CreateProjectDTO {
   ownerId: string;
 }
 
+export interface UpdateProjectDTO {
+  name?: string;
+  description?: string;
+  status?: ProjectStatus;
+  priority?: Priority;
+  startDate?: Date;
+  endDate?: Date;
+  budget?: number;
+  ownerId?: string;
+}
+
 // Task types
 export interface Task {
   id: string;
@@ -94,6 +114,17 @@ export interface CreateTaskDTO {
   startDate?: Date;
   estimatedHours?: number;
   assignedTo?: string[];
+}
+
+export interface UpdateTaskDTO {
+  title: string;
+  description?: string;
+  priority: Priority;
+  endDate: Date;
+  startDate?: Date;
+  estimatedHours?: number;
+  assignedTo?: string[];
+  status: TaskStatus;
 }
 
 export interface UpdateTaskStatusDTO {
