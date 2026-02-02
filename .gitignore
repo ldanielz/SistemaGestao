@@ -1,0 +1,197 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+out/
+
+# Runtime data
+tmp/
+temp/
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# IDE and Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.iml
+
+# Testing
+coverage/
+.nyc_output/
+jest.db
+.jest-cache
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+pgdata/
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
+
+# Docker
+docker-compose.override.yml
+
+# Frontend specific
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/out/
+frontend/.cache/
+frontend/.env.local
+frontend/.env.*.local
+
+# Backend specific
+backend/dist/
+backend/build/
+backend/.env.local
+backend/migrations/
+backend/logs/
+
+# Database dumps
+*.sql.bak
+database/backups/
+
+# Node
+npm-debug.log
+.npm
+.eslintcache
+
+# VS Code workspace settings
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Git
+.git/
+
+# Project specific
+.env.*
+!.env.example
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# Cache directories
+.cache/
+.vite/
+.parcel-cache/
+.turbo/
+.eslintcache
+
+# Electron
+dist_electron/
+node_modules/
+src/main/preload/app.js
+
+# macOS specific
+.AppleDouble
+.LSOverride
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows specific
+[Dd]esktop.ini
+[Ss]ystem[Vv]olume[Ii]nformation
+
+# Linux specific
+.nfs*
+
+# Backup files
+*.backup
+*.bak
+*.bkp
+
+# Certificates and keys (security)
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+!sample.pem
+!sample.key
+
+# Large files (if needed)
+*.iso
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Process files
+*.pid
+*.seed
+
+# Local development
+.env.development.local
+.env.test.local
+.env.staging.local
+
+# Docker volumes
+pgdata/
+redis-data/
+
+# Uploads
+uploads/
+public/uploads/
+
+# Reports
+reports/
+coverage/
+.coverage
+
+# Certificates
+certs/
+keys/
+
+# Misc
+.prettierignore
+.prettierrc
+.eslintignore
+.eslintrc
+
+# Production
+.next/
+out/
+*.js.bak
+
+# Misc
+*.orig
+*.patch
+*.rej
