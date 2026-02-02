@@ -121,7 +121,7 @@ SistemaGestao/
 
 ```bash
 # Clone o repositório
-git clone <repo-url>
+git clone <[repo-url](https://github.com/ldanielz/SistemaGestao)>
 
 # Backend
 cd backend
